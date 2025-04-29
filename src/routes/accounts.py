@@ -14,7 +14,7 @@ from database import (
     PasswordResetTokenModel,
     RefreshTokenModel
 )
-from exceptions import BaseSecurityError, InvalidTokenError, TokenExpiredError
+from exceptions import TokenExpiredError
 from schemas import UserRegistrationResponseSchema, UserRegistrationRequestSchema, UserActivationRequestSchema, \
     MessageResponseSchema, PasswordResetCompleteRequestSchema, PasswordResetRequestSchema, UserLoginRequestSchema, \
     UserLoginResponseSchema, TokenRefreshResponseSchema, TokenRefreshRequestSchema
@@ -157,9 +157,9 @@ async def password_reset_complete(
     result = await db.execute(stmt)
     reset_token = result.scalar_one_or_none()
     if (
-            not reset_token or
-            reset_token.token != user_data.token or
-            reset_token.expires_at.replace(tzinfo=timezone.utc) <= datetime.now(timezone.utc)
+            not reset_token
+            or reset_token.token != user_data.token
+            or reset_token.expires_at.replace(tzinfo=timezone.utc) <= datetime.now(timezone.utc)
     ):
         if reset_token:
             await db.delete(reset_token)
